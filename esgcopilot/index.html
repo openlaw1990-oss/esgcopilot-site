@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESG Copilot — Pre-Disclosure Data Audit</title>
+  <meta name="description" content="Upload your ESG dataset and automatically detect data risks, reporting gaps, and inconsistencies based on GHG Protocol, GRI, and IFRS S2." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/styles.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="logo">
+      <span class="logo-dot"></span>
+      ESG Copilot
+    </div>
+    <div class="nav-right">
+      <span class="nav-email">info@esgcopilot.site</span>
+      <a class="nav-cta" href="mailto:info@esgcopilot.site">Contact us</a>
+    </div>
+  </nav>
+
+  <!-- LANDING -->
+  <section id="landing">
+    <div class="hero">
+      <div class="hero-badge">Pre-Disclosure Data Audit</div>
+      <h1>Make your ESG data<br><span class="accent">disclosure-ready</span> in minutes</h1>
+      <p class="hero-sub">Upload your ESG dataset and automatically detect data risks, reporting gaps, and inconsistencies — with AI advisory notes and a structured review memo.</p>
+      <div class="standards">
+        <span class="std-tag">GHG Protocol</span>
+        <span class="std-tag">GRI Standards</span>
+        <span class="std-tag">IFRS S1 / S2</span>
+        <span class="std-tag">TCFD</span>
+        <span class="std-tag">CDP</span>
+      </div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden />
+        <div class="upload-icon">↑</div>
+        <p class="upload-title">Upload ESG Dataset</p>
+        <p class="upload-sub">CSV or Excel (.xlsx) — drag & drop or click to browse</p>
+        <button class="btn-sample" id="sampleBtn">Try sample dataset →</button>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="how-section">
+      <div class="how-grid">
+        <div class="how-card">
+          <div class="how-num">01</div>
+          <div class="how-title">Upload your data</div>
+          <div class="how-desc">CSV or Excel with Scope 1/2/3, energy, water, waste, and workforce indicators.</div>
+        </div>
+        <div class="how-card">
+          <div class="how-num">02</div>
+          <div class="how-title">Automated QA checks</div>
+          <div class="how-desc">30 validation rules run instantly — reconciliation, unit logic, anomalies, completeness.</div>
+        </div>
+        <div class="how-card">
+          <div class="how-num">03</div>
+          <div class="how-title">AI advisory notes</div>
+          <div class="how-desc">Every issue comes with why it matters, how to fix it, and the disclosure implications.</div>
+        </div>
+        <div class="how-card">
+          <div class="how-num">04</div>
+          <div class="how-title">Export review memo</div>
+          <div class="how-desc">Download a structured QA memo ready to share with your team or assurance provider.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="hidden">
+    <div class="results-wrap">
+
+      <!-- STATUS BAR -->
+      <div class="status-bar" id="statusBar">
+        <div class="status-left">
+          <span class="status-dot dot-red" id="statusDot"></span>
+          <div>
+            <div class="status-label" id="statusLabel">Not ready for disclosure</div>
+            <div class="status-sub" id="statusSub">GreenCo Ltd · ESG Dataset 2021–2024 · 30 indicators · 4 years</div>
+          </div>
+        </div>
+        <div class="status-actions">
+          <button class="btn-back" id="backBtn">← New dataset</button>
+          <button class="btn-export" id="exportBtn">Export review memo</button>
+        </div>
+      </div>
+
+      <!-- METRICS -->
+      <div class="metrics" id="metricsGrid">
+        <div class="metric-card">
+          <div class="metric-label">Total issues</div>
+          <div class="metric-val val-blue" id="metTotal">10</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">High severity</div>
+          <div class="metric-val val-red" id="metHigh">7</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Medium severity</div>
+          <div class="metric-val val-amber" id="metMedium">2</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Low severity</div>
+          <div class="metric-val val-green" id="metLow">1</div>
+        </div>
+      </div>
+
+      <!-- EXEC SUMMARY -->
+      <div class="exec-summary">
+        <div class="exec-title">Executive summary</div>
+        <div class="exec-text" id="execText">
+          10 data issues detected across GreenCo Ltd's 2021–2024 ESG dataset. Critical concerns include a Scope emissions reconciliation gap in 2023, physically impossible water figures, Scope 3 dropping to zero in 2024, and two percentage values exceeding 100%. The dataset requires correction before it is suitable for external ESG disclosure under GRI, IFRS S2, or GHG Protocol standards.
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" data-tab="all">All issues <span class="tab-count" id="tabCountAll">10</span></button>
+        <button class="tab" data-tab="high">High <span class="tab-count tab-count-red" id="tabCountHigh">7</span></button>
+        <button class="tab" data-tab="medium">Medium <span class="tab-count tab-count-amber" id="tabCountMedium">2</span></button>
+        <button class="tab" data-tab="low">Low <span class="tab-count tab-count-green" id="tabCountLow">1</span></button>
+        <button class="tab" data-tab="advisory">AI advisory</button>
+        <button class="tab" data-tab="memo">Review memo</button>
+      </div>
+
+      <!-- TAB CONTENT -->
+      <div id="tab-all" class="tab-panel"></div>
+      <div id="tab-high" class="tab-panel hidden"></div>
+      <div id="tab-medium" class="tab-panel hidden"></div>
+      <div id="tab-low" class="tab-panel hidden"></div>
+
+      <div id="tab-advisory" class="tab-panel hidden">
+        <div class="advisory-intro">
+          AI advisory notes are generated for all high and medium severity issues. Each note explains the business impact, corrective action, and relevant disclosure framework implications.
+        </div>
+        <div id="advisoryContent"></div>
+      </div>
+
+      <div id="tab-memo" class="tab-panel hidden">
+        <div class="memo-box" id="memoContent"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>ESG Copilot · <a href="mailto:info@esgcopilot.site">info@esgcopilot.site</a> · esgcopilot.site</span>
+    <span>Built for sustainability teams and ESG consultants</span>
+  </footer>
+
+  <script src="src/data.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>
