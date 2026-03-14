@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESG Copilot — Pre-Disclosure Data Audit</title>
+  <meta name="description" content="Upload your ESG dataset and automatically detect data risks, reporting gaps, and inconsistencies." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1D9E75;--green-light:#E1F5EE;--green-dark:#0F6E56;
+  --red:#E24B4A;--red-light:#FCEBEB;
+  --amber:#BA7517;--amber-light:#FAEEDA;
+  --blue:#185FA5;--blue-light:#E6F1FB;
+  --bg:#F7F7F5;--surface:#FFFFFF;
+  --border:rgba(0,0,0,0.08);--border-strong:rgba(0,0,0,0.14);
+  --text:#1a1a1a;--text-2:#555;--text-3:#888;
+  --radius:10px;--radius-sm:6px;
+}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;min-height:100vh}
+a{color:var(--green);text-decoration:none}
+a:hover{text-decoration:underline}
+.hidden{display:none!important}
+
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:var(--surface);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:200}
+.logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;letter-spacing:-0.2px}
+.logo-dot{width:9px;height:9px;border-radius:50%;background:var(--green)}
+.nav-right{display:flex;align-items:center;gap:16px}
+.nav-email{font-family:'DM Mono',monospace;font-size:12px;color:var(--text-3)}
+.nav-cta{font-size:13px;font-weight:500;padding:7px 16px;border:0.5px solid var(--border-strong);border-radius:var(--radius-sm);background:transparent;color:var(--text);transition:background 0.15s}
+.nav-cta:hover{background:var(--bg);text-decoration:none}
+
+/* HERO */
+.hero{text-align:center;padding:64px 32px 52px;background:var(--surface);border-bottom:0.5px solid var(--border)}
+.hero-badge{display:inline-block;font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--green-dark);background:var(--green-light);padding:5px 14px;border-radius:20px;margin-bottom:22px}
+.hero h1{font-size:42px;font-weight:600;letter-spacing:-1px;line-height:1.15;margin-bottom:16px}
+.hero h1 .accent{color:var(--green)}
+.hero-sub{font-size:16px;color:var(--text-2);max-width:520px;margin:0 auto 28px;line-height:1.7}
+.standards{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:36px}
+.std-tag{font-size:11px;font-family:'DM Mono',monospace;color:var(--text-3);border:0.5px solid var(--border-strong);padding:4px 10px;border-radius:4px}
+
+/* UPLOAD */
+.upload-zone{border:1.5px dashed var(--green);border-radius:14px;padding:36px 32px;max-width:520px;margin:0 auto;cursor:pointer;transition:background 0.2s;background:rgba(29,158,117,0.03)}
+.upload-zone:hover{background:rgba(29,158,117,0.07)}
+.upload-icon{font-size:24px;font-weight:300;color:var(--green);display:block;margin-bottom:10px}
+.upload-title{font-size:15px;font-weight:500;margin-bottom:4px}
+.upload-sub{font-size:13px;color:var(--text-3);margin-bottom:20px}
+.btn-sample{display:inline-block;font-size:13px;font-weight:500;padding:9px 22px;border-radius:var(--radius-sm);border:0.5px solid var(--border-strong);background:var(--surface);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s,border-color 0.15s}
+.btn-sample:hover{background:var(--green-light);border-color:var(--green);color:var(--green-dark)}
+
+/* HOW */
+.how-section{max-width:900px;margin:0 auto;padding:52px 32px}
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.how-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:20px}
+.how-num{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--green);margin-bottom:10px;letter-spacing:0.06em}
+.how-title{font-size:14px;font-weight:500;margin-bottom:6px}
+.how-desc{font-size:13px;color:var(--text-2);line-height:1.6}
+
+/* RESULTS */
+.results-wrap{max-width:920px;margin:0 auto;padding:32px 24px 60px}
+
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px}
+.status-left{display:flex;align-items:center;gap:12px}
+.status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dot-red{background:var(--red)}
+.dot-amber{background:#EF9F27}
+.dot-green{background:var(--green)}
+.status-label{font-size:14px;font-weight:500}
+.status-sub{font-size:12px;color:var(--text-3);margin-top:2px}
+.status-actions{display:flex;gap:10px}
+.btn-back{font-size:12px;padding:7px 14px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s}
+.btn-back:hover{background:var(--bg)}
+.btn-export{font-size:12px;font-weight:500;padding:7px 16px;border-radius:var(--radius-sm);border:0.5px solid var(--green);background:var(--green);color:white;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background 0.15s}
+.btn-export:hover{background:var(--green-dark);border-color:var(--green-dark)}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.metric-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.metric-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;font-weight:500}
+.metric-val{font-size:30px;font-weight:600;font-family:'DM Mono',monospace;line-height:1}
+.val-blue{color:var(--blue)}.val-red{color:var(--red)}.val-amber{color:var(--amber)}.val-green{color:var(--green)}
+
+/* EXEC SUMMARY */
+.exec-summary{background:var(--surface);border:0.5px solid var(--border);border-left:3px solid var(--red);border-radius:var(--radius);padding:18px 20px;margin-bottom:20px}
+.exec-title{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:#A32D2D;margin-bottom:8px}
+.exec-text{font-size:13px;color:var(--text-2);line-height:1.7}
+
+/* TABS */
+.tabs{display:flex;border-bottom:0.5px solid var(--border);margin-bottom:16px;overflow-x:auto}
+.tab{font-size:13px;padding:10px 18px;cursor:pointer;color:var(--text-2);border:none;border-bottom:2px solid transparent;background:none;font-weight:500;font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
+.tab:hover:not(.active){color:var(--text)}
+.tab-count{font-size:10px;font-family:'DM Mono',monospace;font-weight:500;background:var(--bg);color:var(--text-2);padding:1px 6px;border-radius:10px}
+.tab-count-red{background:var(--red-light);color:#A32D2D}
+.tab-count-amber{background:var(--amber-light);color:var(--amber)}
+.tab-count-green{background:var(--green-light);color:var(--green-dark)}
+
+/* ISSUE CARDS */
+.tab-panel{padding-bottom:8px}
+.issue-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;transition:border-color 0.15s}
+.issue-card:hover{border-color:var(--border-strong)}
+.issue-header{display:flex;align-items:flex-start;gap:10px}
+.issue-header.has-advisory{margin-bottom:14px}
+.sev-badge{font-size:10px;font-weight:500;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0;font-family:'DM Mono',monospace;margin-top:1px}
+.sev-high{background:var(--red-light);color:#791F1F}
+.sev-medium{background:var(--amber-light);color:#633806}
+.sev-low{background:var(--green-light);color:var(--green-dark)}
+.issue-body{flex:1}
+.issue-title{font-size:13px;font-weight:500;line-height:1.45;color:var(--text)}
+.issue-location{font-size:11px;color:var(--text-3);font-family:'DM Mono',monospace;margin-top:3px}
+.risk-tags{display:flex;gap:5px;margin-left:auto;flex-shrink:0}
+.risk-tag{font-size:10px;padding:2px 7px;border-radius:3px;font-family:'DM Mono',monospace;white-space:nowrap}
+.risk-audit{background:var(--red-light);color:#791F1F}
+.risk-comparability{background:var(--blue-light);color:#0C447C}
+.risk-completeness{background:var(--amber-light);color:#633806}
+
+/* ADVISORY */
+.advisory-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.adv-block{background:var(--bg);border-radius:var(--radius-sm);padding:11px 13px}
+.adv-label{font-size:10px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-3);margin-bottom:5px;font-weight:500}
+.adv-text{font-size:12px;color:var(--text-2);line-height:1.6}
+.advisory-intro{font-size:13px;color:var(--text-2);margin-bottom:16px;padding:14px 16px;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);line-height:1.6}
+
+/* MEMO */
+.memo-box{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:32px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.9;color:var(--text-2)}
+.memo-box h2{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:4px}
+.memo-box h3{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text);margin:20px 0 8px}
+.memo-box hr{border:none;border-top:0.5px solid var(--border);margin:18px 0}
+.memo-box strong{color:var(--text);font-weight:500}
+.memo-meta{font-size:11px;line-height:2}
+.memo-footer{font-size:11px;color:var(--text-3);margin-top:24px;padding-top:16px;border-top:0.5px solid var(--border)}
+.memo-status-bad{color:var(--red);font-weight:500}
+.memo-status-ok{color:var(--green);font-weight:500}
+
+/* FOOTER */
+.footer{display:flex;justify-content:space-between;align-items:center;padding:20px 40px;border-top:0.5px solid var(--border);font-size:12px;color:var(--text-3);background:var(--surface)}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .nav{padding:12px 20px}.nav-email{display:none}
+  .hero{padding:44px 20px 40px}.hero h1{font-size:28px}
+  .how-grid{grid-template-columns:1fr 1fr}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .advisory-grid{grid-template-columns:1fr}
+  .results-wrap{padding:20px 16px 40px}
+  .status-bar{flex-direction:column;align-items:flex-start;gap:12px}
+  .footer{flex-direction:column;gap:6px;padding:16px 20px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="logo"><span class="logo-dot"></span>ESG Copilot</div>
+  <div class="nav-right">
+    <span class="nav-email">info@esgcopilot.site</span>
+    <a class="nav-cta" href="mailto:info@esgcopilot.site">Contact us</a>
+  </div>
+</nav>
+
+<section id="landing">
+  <div class="hero">
+    <div class="hero-badge">Pre-Disclosure Data Audit</div>
+    <h1>Make your ESG data<br><span class="accent">disclosure-ready</span> in minutes</h1>
+    <p class="hero-sub">Upload your ESG dataset and automatically detect data risks, reporting gaps, and inconsistencies — with AI advisory notes and a structured review memo.</p>
+    <div class="standards">
+      <span class="std-tag">GHG Protocol</span>
+      <span class="std-tag">GRI Standards</span>
+      <span class="std-tag">IFRS S1 / S2</span>
+      <span class="std-tag">TCFD</span>
+      <span class="std-tag">CDP</span>
+    </div>
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden />
+      <span class="upload-icon">↑</span>
+      <p class="upload-title">Upload ESG Dataset</p>
+      <p class="upload-sub">CSV or Excel (.xlsx) — drag & drop or click to browse</p>
+      <button class="btn-sample" id="sampleBtn">Try sample dataset →</button>
+    </div>
+  </div>
+  <div class="how-section">
+    <div class="how-grid">
+      <div class="how-card"><div class="how-num">01</div><div class="how-title">Upload your data</div><div class="how-desc">CSV or Excel with Scope 1/2/3, energy, water, waste, and workforce indicators.</div></div>
+      <div class="how-card"><div class="how-num">02</div><div class="how-title">Automated QA checks</div><div class="how-desc">15 validation rules run instantly — reconciliation, unit logic, anomalies, completeness.</div></div>
+      <div class="how-card"><div class="how-num">03</div><div class="how-title">AI advisory notes</div><div class="how-desc">Every issue comes with why it matters, how to fix it, and the disclosure implications.</div></div>
+      <div class="how-card"><div class="how-num">04</div><div class="how-title">Export review memo</div><div class="how-desc">Download a structured QA memo ready to share with your team or assurance provider.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="results" class="hidden">
+  <div class="results-wrap">
+    <div class="status-bar">
+      <div class="status-left">
+        <span class="status-dot dot-red" id="statusDot"></span>
+        <div>
+          <div class="status-label" id="statusLabel">Not ready for disclosure</div>
+          <div class="status-sub" id="statusSub"></div>
+        </div>
+      </div>
+      <div class="status-actions">
+        <button class="btn-back" id="backBtn">← New dataset</button>
+        <button class="btn-export" id="exportBtn">Export review memo</button>
+      </div>
+    </div>
+    <div class="metrics">
+      <div class="metric-card"><div class="metric-label">Total issues</div><div class="metric-val val-blue" id="metTotal">0</div></div>
+      <div class="metric-card"><div class="metric-label">High severity</div><div class="metric-val val-red" id="metHigh">0</div></div>
+      <div class="metric-card"><div class="metric-label">Medium severity</div><div class="metric-val val-amber" id="metMedium">0</div></div>
+      <div class="metric-card"><div class="metric-label">Low severity</div><div class="metric-val val-green" id="metLow">0</div></div>
+    </div>
+    <div class="exec-summary" id="execSummaryBox">
+      <div class="exec-title">Executive summary</div>
+      <div class="exec-text" id="execText"></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="all">All issues <span class="tab-count" id="tcAll">0</span></button>
+      <button class="tab" data-tab="high">High <span class="tab-count tab-count-red" id="tcHigh">0</span></button>
+      <button class="tab" data-tab="medium">Medium <span class="tab-count tab-count-amber" id="tcMedium">0</span></button>
+      <button class="tab" data-tab="low">Low <span class="tab-count tab-count-green" id="tcLow">0</span></button>
+      <button class="tab" data-tab="advisory">AI advisory</button>
+      <button class="tab" data-tab="memo">Review memo</button>
+    </div>
+    <div id="tab-all" class="tab-panel"></div>
+    <div id="tab-high" class="tab-panel hidden"></div>
+    <div id="tab-medium" class="tab-panel hidden"></div>
+    <div id="tab-low" class="tab-panel hidden"></div>
+    <div id="tab-advisory" class="tab-panel hidden">
+      <div class="advisory-intro">AI advisory notes for all high and medium severity issues — each note explains the business impact, corrective action, and disclosure framework implications.</div>
+      <div id="advisoryContent"></div>
+    </div>
+    <div id="tab-memo" class="tab-panel hidden">
+      <div class="memo-box" id="memoContent"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <span>ESG Copilot · <a href="mailto:info@esgcopilot.site">info@esgcopilot.site</a> · esgcopilot.site</span>
+  <span>Built for sustainability teams and ESG consultants</span>
+</footer>
+
+<script>
+// ── SAMPLE DATA ──
+const SAMPLE_DATA=[
+  {Company:"GreenCo Ltd",Industry:"Manufacturing",Country:"Canada",Year:2021,Revenue_USD:500000000,Employees:4200,Scope1_tCO2e:1200,Scope2_location_tCO2e:800,Scope2_market_tCO2e:760,Scope3_tCO2e:3200,Total_emissions_tCO2e:5200,Emissions_intensity:0.0000104,Energy_consumption_MWh:45000,Electricity_use_MWh:28000,Fuel_use_GJ:15000,Renewable_energy_pct:32,Water_withdrawal_m3:120000,Water_consumption_m3:100000,Water_recycled_pct:40,Waste_generated_tons:5000,Waste_recycled_pct:55,Hazardous_waste_tons:320,Total_employees:4200,Female_employees_pct:38,Injury_rate:1.2,Training_hours_per_employee:22,Net_zero_target_year:2050,Science_based_target:"Yes",Internal_carbon_price_USD:45},
+  {Company:"GreenCo Ltd",Industry:"Manufacturing",Country:"Canada",Year:2022,Revenue_USD:540000000,Employees:4300,Scope1_tCO2e:1180,Scope2_location_tCO2e:780,Scope2_market_tCO2e:740,Scope3_tCO2e:3300,Total_emissions_tCO2e:5000,Emissions_intensity:0.0000092,Energy_consumption_MWh:46000,Electricity_use_MWh:29000,Fuel_use_GJ:15200,Renewable_energy_pct:34,Water_withdrawal_m3:118000,Water_consumption_m3:102000,Water_recycled_pct:42,Waste_generated_tons:5200,Waste_recycled_pct:57,Hazardous_waste_tons:330,Total_employees:4300,Female_employees_pct:39,Injury_rate:1.1,Training_hours_per_employee:23,Net_zero_target_year:2050,Science_based_target:"Yes",Internal_carbon_price_USD:45},
+  {Company:"GreenCo Ltd",Industry:"Manufacturing",Country:"Canada",Year:2023,Revenue_USD:580000000,Employees:4450,Scope1_tCO2e:1150,Scope2_location_tCO2e:760,Scope2_market_tCO2e:720,Scope3_tCO2e:3100,Total_emissions_tCO2e:4920,Emissions_intensity:0.0000085,Energy_consumption_MWh:47000,Electricity_use_MWh:30000,Fuel_use_GJ:15800,Renewable_energy_pct:36,Water_withdrawal_m3:121000,Water_consumption_m3:130000,Water_recycled_pct:44,Waste_generated_tons:5100,Waste_recycled_pct:59,Hazardous_waste_tons:340,Total_employees:4450,Female_employees_pct:40,Injury_rate:-0.3,Training_hours_per_employee:24,Net_zero_target_year:2050,Science_based_target:"Yes",Internal_carbon_price_USD:45},
+  {Company:"GreenCo Ltd",Industry:"Manufacturing",Country:"Canada",Year:2024,Revenue_USD:620000000,Employees:4600,Scope1_tCO2e:1100,Scope2_location_tCO2e:720,Scope2_market_tCO2e:null,Scope3_tCO2e:0,Total_emissions_tCO2e:5100,Emissions_intensity:0.0000082,Energy_consumption_MWh:48000,Electricity_use_MWh:31000,Fuel_use_GJ:16000,Renewable_energy_pct:120,Water_withdrawal_m3:125000,Water_consumption_m3:118000,Water_recycled_pct:48,Waste_generated_tons:5200,Waste_recycled_pct:105,Hazardous_waste_tons:350,Total_employees:4600,Female_employees_pct:41,Injury_rate:0.9,Training_hours_per_employee:26,Net_zero_target_year:2050,Science_based_target:"Yes",Internal_carbon_price_USD:45},
+  {Company:"GreenCo Ltd",Industry:"Manufacturing",Country:"Canada",Year:2024,Revenue_USD:620000000,Employees:4600,Scope1_tCO2e:1100,Scope2_location_tCO2e:720,Scope2_market_tCO2e:null,Scope3_tCO2e:0,Total_emissions_tCO2e:5100,Emissions_intensity:0.0000082,Energy_consumption_MWh:48000,Electricity_use_MWh:31000,Fuel_use_GJ:16000,Renewable_energy_pct:120,Water_withdrawal_m3:125000,Water_consumption_m3:118000,Water_recycled_pct:48,Waste_generated_tons:5200,Waste_recycled_pct:105,Hazardous_waste_tons:350,Total_employees:4600,Female_employees_pct:41,Injury_rate:0.9,Training_hours_per_employee:26,Net_zero_target_year:2050,Science_based_target:"Yes",Internal_carbon_price_USD:45}
+];
+
+// ── QA RULES ──
+const QA_RULES=[
+  {id:"A02",category:"Data integrity",severity:"high",name:"Duplicate rows detected",
+   check:(rows)=>{const seen={},issues=[];rows.forEach((r,i)=>{const k=`${r.Company}-${r.Year}`;if(seen[k]!==undefined)issues.push({row:i+1,year:r.Year,field:"Year",detail:`Duplicate entry for ${r.Year} (also row ${seen[k]+1})`});else seen[k]=i;});return issues;}},
+  {id:"B01",category:"GHG emissions",severity:"high",name:"Scope emissions reconciliation gap",riskType:"audit",
+   whyMatters:"The sum of individual Scopes does not equal the reported total, creating inconsistencies that assurance providers will flag immediately.",
+   suggestedFix:"Reconcile each Scope against source data. Check for double-counting across Scope 2 location vs. market-based figures.",
+   disclosureNote:"Under GHG Protocol, total emissions must equal the sum of all reported Scopes. Unresolved gaps will be flagged in external assurance reviews.",
+   check:(rows)=>{const issues=[];rows.forEach((r,i)=>{if(r.Scope1_tCO2e!=null&&r.Scope2_location_tCO2e!=null&&r.Scope3_tCO2e!=null&&r.Total_emissions_tCO2e!=null){const sum=r.Scope1_tCO2e+r.Scope2_location_tCO2e+r.Scope3_tCO2e,diff=Math.abs(sum-r.Total_emissions_tCO2e);if(diff>10)issues.push({row:i+1,year:r.Year,field:"Total_emissions_tCO2e",detail:`Scope1+2+3=${sum.toLocaleString()} ≠ Total ${r.Total_emissions_tCO2e.toLocaleString()} (delta: ${diff.toFixed(0)} tCO₂e)`});}});return issues;}},
+  {id:"B02",category:"GHG emissions",severity:"high",name:"Scope 3 emissions drop to zero",riskType:"comparability",
+   whyMatters:"A sudden Scope 3 drop to zero almost never reflects a genuine reduction — it typically indicates missing data or a reporting boundary change. Scope 3 typically represents 60–90% of a manufacturer's total footprint.",
+   suggestedFix:"Verify Scope 3 category-level data for the affected year. Confirm whether categories were calculated or omitted.",
+   disclosureNote:"IFRS S2 and GRI 305 require disclosure of reporting boundaries. If Scope 3 is unavailable, a methodological note is required to maintain comparability.",
+   check:(rows)=>{const issues=[];rows.forEach((r,i)=>{if(r.Scope3_tCO2e===0||r.Scope3_tCO2e===null){const prev=rows.find(p=>p.Year===r.Year-1);if(prev&&prev.Scope3_tCO2e>0)issues.push({row:i+1,year:r.Year,field:"Scope3_tCO2e",detail:`Scope 3 = 0 in ${r.Year} (was ${prev.Scope3_tCO2e.toLocaleString()} in ${prev.Year})`});}});return issues;}},
+  {id:"B04",category:"GHG emissions",severity:"high",name:"Scope 2 market-based value missing",riskType:"completeness",
+   whyMatters:"GHG Protocol Scope 2 Guidance requires both location-based and market-based figures. Omitting one method makes CDP submissions and IFRS S2 disclosures incomplete.",
+   suggestedFix:"Calculate market-based Scope 2 using applicable emission factors. If no contractual instruments are in use, document this explicitly.",
+   disclosureNote:"CDP Climate questionnaire requires both Scope 2 figures. Missing market-based values will result in an incomplete submission score.",
+   check:(rows)=>{const issues=[];rows.forEach((r,i)=>{if(r.Scope2_location_tCO2e!=null&&(r.Scope2_market_tCO2e===null||r.Scope2_market_tCO2e===undefined))issues.push({row:i+1,year:r.Year,field:"Scope2_market_tCO2e",detail:`Location-based Scope 2 present but market-based value is missing`});});return issues;}},
+  {id:"C01",category:"Emissions intensity",severity:"high",name:"Emissions intensity mismatch",riskType:"comparability",
+   whyMatters:"Emissions intensity is a key benchmarking KPI used by institutional investors. A manually entered value that differs from the calculated value creates discrepancies.",
+   suggestedFix:"Recalculate intensity as Total_emissions / Revenue. Ensure intensity is always derived automatically from source values.",
+   disclosureNote:"Intensity metrics reported externally must be consistent with absolute emissions figures. A significant variance will be identified during assurance.",
+   check:(rows)=>{const issues=[];rows.forEach((r,i)=>{if(r.Total_emissions_tCO2e&&r.Revenue_USD&&r.Emissions_intensity){const calc=r.Total_emissions_tCO2e/r.Revenue_USD,variance=Math.abs(calc-r.Emissions_intensity)/r.Emissions_intensity;if(variance>0.05)issues.push({row:i+1,year:r.Year,field:"Emissions_intensity",detail:`Reported ${r.Emissions_intensity.toExponential(3)} ≠ calculated ${calc.toExponential(3)} (${(variance*100).toFixed(1)}% variance)`});}});return issues;}},
+  {id:"D01",category:"Year-over-year",severity:"medium",name:"Unusual year-over-year emissions change",riskType:"comparability",
+   whyMatters:"An abrupt multi-year change may signal an incomplete dataset, a methodology change, or a reporting boundary revision that has not been disclosed.",
+   suggestedFix:"Verify whether the change reflects a genuine operational shift or a data quality issue. Document the underlying cause in the sustainability report.",
+   disclosureNote:"Sustainability reports should include narrative explanation for significant year-on-year changes. Unexplained reductions attract scrutiny from investors.",
+   check:(rows)=>{const issues=[],sorted=[...rows].sort((a,b)=>a.Year-b.Year);for(let i=1;i<sorted.length;i++){const p=sorted[i-1],c=sorted[i];if(p.Total_emissions_tCO2e&&c.Total_emissions_tCO2e){const chg=Math.abs((c.Total_emissions_tCO2e-p.Total_emissions_tCO2e)/p.Total_emissions_tCO2e);if(chg>0.40){const dir=c.Total_emissions_tCO2e>p.Total_emissions_tCO2e?"increase":"decline";issues.push({row:i+1,year:c.Year,field:"Total_emissions_tCO2e",detail:`${(chg*100).toFixed(0)}% YoY ${dir} (${p.Year}: ${p.Total_emissions_tCO2e.toLocaleString()} → ${c.Year}: ${c.Total_emissions_tCO2e.toLocaleString()} tCO₂e)`});}}}return issues;}},
+  {id:"F01",category:"Water",severity:"high",name:"Water consumption exceeds withdrawal",riskType:"audit",
+   whyMatters:"Consumption cannot physically exceed withdrawal — this indicates a data entry error, unit mismatch, or formula error in the source spreadsheet.",
+   suggestedFix:"Review source data for water figures. Check whether units are consistent (both in m³). Verify that withdrawal captures all intake sources.",
+   disclosureNote:"Water data with physically impossible values will be rejected by CDP Water questionnaire validation.",
+   check:(rows)=>{const issues=[];rows.forEach((r,i)=>{if(r.Water_consumption_m3!=null&&r.Water_withdrawal_m3!=null&&r.Water_consumption_m3>r.Water_withdrawal_m3)issues.push({row:i+1,year:r.Year,field:"Water_consumption_m3",detail:`Consumption ${r.Water_consumption_m3.toLocaleString()} m³ > Withdrawal ${r.Water_withdrawal_m3.toLocaleString()} m³ (physically impossible)`});});return issues;}},
+  {id:"G01",category:"Waste",severity:"high",name:"Waste recycling rate exceeds 100%",riskType:"audit",
+   whyMatters:"A recycling rate above 100% is logically impossible and indicates a denominator error — typically using a waste sub-category rather than total waste generated.",
+   suggestedFix:"Review the recycling rate formula. Ensure the denominator is total waste generated. Check for unit inconsistencies (tonnes vs. kg).",
+   disclosureNote:"GRI 306-4 requires accurate waste diversion rates. Values above 100% will be flagged by GRI-trained reviewers and assurance providers.",
+   check:(rows)=>{const issues=[];rows.forEach((r,i)=>{if(r.Waste_recycled_pct!=null&&r.Waste_recycled_pct>100)issues.push({row:i+1,year:r.Year,field:"Waste_recycled_pct",detail:`Waste recycled = ${r.Waste_recycled_pct}% — exceeds 100% (formula error)`});});return issues;}},
+  {id:"H01",category:"Percentages",severity:"high",name:"Renewable energy percentage exceeds 100%",riskType:"audit",
+   whyMatters:"A renewable energy percentage above 100% indicates a formula error — likely calculating against a subset of total electricity consumption.",
+   suggestedFix:"Correct the denominator to total electricity consumption. If figure includes externally sold energy, disclose separately.",
+   disclosureNote:"GRI 302-1 and CDP Climate require accurate renewable energy percentages. Values above 100% fail automated validation checks.",
+   check:(rows)=>{const issues=[];rows.forEach((r,i)=>{if(r.Renewable_energy_pct!=null&&r.Renewable_energy_pct>100)issues.push({row:i+1,year:r.Year,field:"Renewable_energy_pct",detail:`Renewable energy = ${r.Renewable_energy_pct}% — exceeds 100% (denominator error)`});});return issues;}},
+  {id:"I01",category:"Workforce",severity:"medium",name:"Negative injury rate",riskType:"audit",
+   whyMatters:"A negative injury rate is logically impossible and indicates a data entry or formula error. Safety data is prominently reviewed by ESG rating agencies.",
+   suggestedFix:"Review source data for safety performance indicators and correct the injury rate formula. Rate should be per 200,000 hours worked (OSHA standard).",
+   disclosureNote:"GRI 403-9 and SASB require accurate safety metrics. Negative values will immediately flag data quality concerns during investor due diligence.",
+   check:(rows)=>{const issues=[];rows.forEach((r,i)=>{if(r.Injury_rate!=null&&r.Injury_rate<0)issues.push({row:i+1,year:r.Year,field:"Injury_rate",detail:`Injury rate = ${r.Injury_rate} — negative value is impossible`});});return issues;}}
+];
+
+// ── STATE ──
+let currentIssues=[],currentMeta={};
+const RISK_LABELS={audit:"Audit risk",comparability:"Comparability",completeness:"Completeness"};
+const RISK_CLASSES={audit:"risk-audit",comparability:"risk-comparability",completeness:"risk-completeness"};
+
+// ── QA ENGINE ──
+function runQA(rows){
+  const all=[];
+  QA_RULES.forEach(rule=>{
+    try{rule.check(rows).forEach(i=>all.push({...rule,...i}));}
+    catch(e){console.warn(rule.id,e);}
+  });
+  return all.sort((a,b)=>({high:0,medium:1,low:2}[a.severity]-{high:0,medium:1,low:2}[b.severity]));
+}
+
+// ── CARD HTML ──
+function buildCard(issue,showAdv){
+  const lbl=issue.severity[0].toUpperCase()+issue.severity.slice(1);
+  const risk=issue.riskType?`<span class="risk-tag ${RISK_CLASSES[issue.riskType]}">${RISK_LABELS[issue.riskType]}</span>`:"";
+  const hasAdv=showAdv&&(issue.whyMatters||issue.suggestedFix||issue.disclosureNote);
+  const adv=hasAdv?`<div class="advisory-grid">
+    ${issue.whyMatters?`<div class="adv-block"><div class="adv-label">Why it matters</div><div class="adv-text">${issue.whyMatters}</div></div>`:""}
+    ${issue.suggestedFix?`<div class="adv-block"><div class="adv-label">Suggested fix</div><div class="adv-text">${issue.suggestedFix}</div></div>`:""}
+    ${issue.disclosureNote?`<div class="adv-block"><div class="adv-label">Disclosure implication</div><div class="adv-text">${issue.disclosureNote}</div></div>`:""}
+  </div>`:"";
+  return `<div class="issue-card">
+    <div class="issue-header${hasAdv?" has-advisory":""}">
+      <span class="sev-badge sev-${issue.severity}">${lbl}</span>
+      <div class="issue-body">
+        <div class="issue-title">${issue.name}</div>
+        <div class="issue-location">${issue.year?issue.year+" · ":""}${issue.field||""} · ${issue.detail}</div>
+      </div>
+      <div class="risk-tags">${risk}</div>
+    </div>${adv}
+  </div>`;
+}
+
+// ── RENDER ──
+function render(issues,meta){
+  currentIssues=issues; currentMeta=meta;
+  const h=issues.filter(i=>i.severity==="high"),m=issues.filter(i=>i.severity==="medium"),l=issues.filter(i=>i.severity==="low");
+  document.getElementById("metTotal").textContent=issues.length;
+  document.getElementById("metHigh").textContent=h.length;
+  document.getElementById("metMedium").textContent=m.length;
+  document.getElementById("metLow").textContent=l.length;
+  document.getElementById("tcAll").textContent=issues.length;
+  document.getElementById("tcHigh").textContent=h.length;
+  document.getElementById("tcMedium").textContent=m.length;
+  document.getElementById("tcLow").textContent=l.length;
+  const dot=document.getElementById("statusDot"),lbl=document.getElementById("statusLabel"),box=document.getElementById("execSummaryBox");
+  dot.className="status-dot";
+  if(h.length>0){dot.classList.add("dot-red");lbl.textContent="Not ready for disclosure";box.style.borderLeftColor="#E24B4A";}
+  else if(m.length>0){dot.classList.add("dot-amber");lbl.textContent="Conditionally ready — review required";box.style.borderLeftColor="#EF9F27";}
+  else{dot.classList.add("dot-green");lbl.textContent="Ready for disclosure";box.style.borderLeftColor="#1D9E75";}
+  document.getElementById("statusSub").textContent=`${meta.company} · ${meta.file} · ${meta.indicators} indicators · ${meta.years} years`;
+  document.getElementById("execText").textContent=buildExec(issues,meta);
+  const empty="<p style='color:#888;font-size:13px;padding:16px'>No issues in this category.</p>";
+  document.getElementById("tab-all").innerHTML=issues.map(i=>buildCard(i,false)).join("")||empty;
+  document.getElementById("tab-high").innerHTML=h.map(i=>buildCard(i,true)).join("")||empty;
+  document.getElementById("tab-medium").innerHTML=m.map(i=>buildCard(i,true)).join("")||empty;
+  document.getElementById("tab-low").innerHTML=l.map(i=>buildCard(i,false)).join("")||empty;
+  const adv=issues.filter(i=>i.whyMatters&&(i.severity==="high"||i.severity==="medium"));
+  document.getElementById("advisoryContent").innerHTML=adv.map(i=>buildCard(i,true)).join("")||empty;
+  document.getElementById("memoContent").innerHTML=buildMemo(issues,meta);
+  document.getElementById("landing").classList.add("hidden");
+  document.getElementById("results").classList.remove("hidden");
+  showTab("all");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function buildExec(issues,meta){
+  if(!issues.length)return`No data quality issues detected in ${meta.company}'s ${meta.file}. The dataset appears consistent. A final human review is recommended before submission.`;
+  const h=issues.filter(i=>i.severity==="high").length,m=issues.filter(i=>i.severity==="medium").length,l=issues.filter(i=>i.severity==="low").length;
+  const names=[...new Set(issues.filter(i=>i.severity==="high").slice(0,3).map(i=>i.name.toLowerCase()))];
+  const risk=names.length?`Critical concerns include: ${names.join(", ")}.`:"";
+  return`${issues.length} data issue${issues.length>1?"s":""} detected across ${meta.company}'s ${meta.file} (${h} high, ${m} medium, ${l} low severity). ${risk} The dataset requires correction before external ESG disclosure under GRI, IFRS S2, or GHG Protocol standards.`;
+}
+
+function buildMemo(issues,meta){
+  const today=new Date().toLocaleDateString("en-CA",{year:"numeric",month:"long",day:"numeric"});
+  const h=issues.filter(i=>i.severity==="high"),m=issues.filter(i=>i.severity==="medium"),l=issues.filter(i=>i.severity==="low");
+  const status=h.length>0?'<span class="memo-status-bad">NOT READY FOR DISCLOSURE</span>':m.length>0?'<span style="color:#BA7517;font-weight:500">CONDITIONALLY READY</span>':'<span class="memo-status-ok">READY FOR DISCLOSURE</span>';
+  const list=arr=>arr.map((i,n)=>`${n+1}. ${i.name} — ${i.year||""} (${i.detail})`).join("\n");
+  const steps=[...new Set(issues.filter(i=>i.suggestedFix).map(i=>i.suggestedFix))].slice(0,8).map((s,n)=>`${n+1}. ${s}`).join("\n");
+  return`<h2>ESG Data QA Review Memo</h2><hr>
+<p class="memo-meta"><strong>Dataset:</strong> ${meta.company} — ${meta.file}<br><strong>Period:</strong> ${meta.period||"Multiple years"}<br><strong>Review date:</strong> ${today}<br><strong>Prepared by:</strong> ESG Copilot · esgcopilot.site<br><strong>Contact:</strong> info@esgcopilot.site</p><hr>
+<h3>Disclosure readiness</h3><p>${status}</p><p style="margin-top:8px;font-size:12px">${buildExec(issues,meta)}</p>
+${h.length?`<hr><h3>High severity issues (${h.length})</h3><pre style="white-space:pre-wrap;font-size:11px">${list(h)}</pre>`:""}
+${m.length?`<hr><h3>Medium severity issues (${m.length})</h3><pre style="white-space:pre-wrap;font-size:11px">${list(m)}</pre>`:""}
+${l.length?`<hr><h3>Low severity issues (${l.length})</h3><pre style="white-space:pre-wrap;font-size:11px">${list(l)}</pre>`:""}
+${steps?`<hr><h3>Recommended next steps</h3><pre style="white-space:pre-wrap;font-size:11px">${steps}</pre>`:""}
+<div class="memo-footer">Generated by ESG Copilot · info@esgcopilot.site · esgcopilot.site</div>`;
+}
+
+// ── TABS ──
+function showTab(name){
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.add("hidden"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  const p=document.getElementById("tab-"+name);if(p)p.classList.remove("hidden");
+  const b=document.querySelector(`.tab[data-tab="${name}"]`);if(b)b.classList.add("active");
+}
+
+// ── EXPORT ──
+function exportMemo(){
+  showTab("memo");
+  const text=document.getElementById("memoContent").innerText||"";
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([text],{type:"text/plain"}));
+  a.download=`ESG-QA-Memo-${(currentMeta.company||"report").replace(/\s+/g,"-")}.txt`;
+  a.click();
+}
+
+// ── CSV PARSER ──
+function parseCSV(text){
+  const lines=text.trim().split("\n"),headers=lines[0].split(",").map(h=>h.trim().replace(/"/g,""));
+  return lines.slice(1).filter(l=>l.trim()).map(line=>{
+    const vals=line.split(",").map(v=>v.trim().replace(/"/g,""));
+    const obj={};
+    headers.forEach((h,i)=>{const v=vals[i];obj[h]=(v===""||v==null)?null:isNaN(v)?v:parseFloat(v);});
+    return obj;
+  });
+}
+
+// ── LOAD SAMPLE ──
+function loadSample(){
+  const years=[...new Set(SAMPLE_DATA.map(r=>r.Year))].sort();
+  render(runQA(SAMPLE_DATA),{company:"GreenCo Ltd",file:"ESG Dataset 2021–2024",period:`${years[0]}–${years[years.length-1]}`,indicators:"30",years:years.length});
+}
+
+// ── FILE UPLOAD ──
+function handleFile(file){
+  if(!file)return;
+  if(file.name.endsWith(".csv")){
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{
+        const rows=parseCSV(e.target.result);
+        const years=[...new Set(rows.map(r=>r.Year))].sort();
+        const company=rows[0]?.Company||file.name.replace(/\.[^.]+$/,"");
+        render(runQA(rows),{company,file:file.name,period:years.length?`${years[0]}–${years[years.length-1]}`:"—",indicators:Object.keys(rows[0]||{}).length.toString(),years:years.length});
+      }catch(err){alert("Could not parse CSV. Please ensure your file uses standard CSV formatting with column headers.");}
+    };
+    reader.readAsText(file);
+  }else{alert("Currently supports CSV files. Save your Excel file as CSV and re-upload.");}
+}
+
+// ── INIT ──
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("sampleBtn").addEventListener("click",e=>{e.stopPropagation();loadSample();});
+  const zone=document.getElementById("uploadZone"),fi=document.getElementById("fileInput");
+  zone.addEventListener("click",()=>fi.click());
+  fi.addEventListener("change",e=>{if(e.target.files[0])handleFile(e.target.files[0]);});
+  zone.addEventListener("dragover",e=>{e.preventDefault();zone.style.background="rgba(29,158,117,0.1)";});
+  zone.addEventListener("dragleave",()=>{zone.style.background="";});
+  zone.addEventListener("drop",e=>{e.preventDefault();zone.style.background="";if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+  document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+  document.getElementById("exportBtn").addEventListener("click",exportMemo);
+  document.getElementById("backBtn").addEventListener("click",()=>{
+    document.getElementById("results").classList.add("hidden");
+    document.getElementById("landing").classList.remove("hidden");
+    window.scrollTo({top:0});
+  });
+});
+</script>
+</body>
+</html>
